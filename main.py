@@ -6,11 +6,10 @@ import statistics
 class CanalSimulation:
     def __init__(self, env, num_locks, tiempo_servicio):
         self.env = env
-        # El canal se modela como un recurso que puede atender 'num_locks' barcos simultáneamente.
         self.lock = simpy.Resource(env, capacity=num_locks)
-        self.tiempo_servicio = tiempo_servicio  # tiempo promedio que tarda en pasar un barco
-        self.esperas = []  # lista para almacenar los tiempos de espera de cada barco
-        self.num_barcos = 0  # contador de barcos procesados
+        self.tiempo_servicio = tiempo_servicio  # tiempo que tarda en pasar un barco
+        self.esperas = []  #tiempos de espera de cada barco
+        self.num_barcos = 0
 
     def procesar_barco(self, nombre):
         tiempo_llegada = self.env.now
@@ -22,24 +21,23 @@ class CanalSimulation:
             espera = tiempo_entrada - tiempo_llegada
             self.esperas.append(espera)
             print(f"{tiempo_entrada:.2f}: {nombre} entra en el canal después de esperar {espera:.2f}.")
-            # Se simula el tiempo de servicio usando una distribución exponencial
             servicio = random.expovariate(1.0 / self.tiempo_servicio)
             yield self.env.timeout(servicio)
             tiempo_salida = self.env.now
             print(f"{tiempo_salida:.2f}: {nombre} sale del canal.")
             self.num_barcos += 1
 
-# Proceso que genera la llegada de barcos
+# Metdo de la llegada de barcos
 def proceso_llegadas(env, tasa_llegada, canal):
     barco_id = 0
     while True:
-        # El tiempo entre llegadas se modela con una distribución exponencial
+        # Usamos una distribucion exponencial para simular el tiempo de las llamadas
         tiempo_entre_llegadas = random.expovariate(tasa_llegada)
         yield env.timeout(tiempo_entre_llegadas)
         barco_id += 1
         env.process(canal.procesar_barco(f"Barco {barco_id}"))
 
-# Función para ejecutar la simulación en un escenario dado
+# Metodo para ejecutar la simulación
 def run_simulation(tiempo_simulacion, tasa_llegada, tiempo_servicio, num_locks):
     random.seed(42)  # Para reproducibilidad
     env = simpy.Environment()
@@ -53,10 +51,10 @@ def run_simulation(tiempo_simulacion, tasa_llegada, tiempo_servicio, num_locks):
     print(f"Tiempo de espera promedio: {promedio_espera:.2f}\n")
     return canal
 
-# Función principal que define y ejecuta distintos escenarios
+# Función main
 def main():
-    tiempo_simulacion = 1000  # tiempo total de la simulación (por ejemplo, en minutos)
-    # Definición de escenarios con diferentes tasas de llegada (barcos/minuto)
+    tiempo_simulacion = 1000  # tiempo total de la simulación
+    # Difernetes posibles escenarios
     escenarios = [
         {"nombre": "Tráfico ligero", "tasa_llegada": 0.1, "tiempo_servicio": 5, "num_locks": 2},
         {"nombre": "Tráfico moderado", "tasa_llegada": 0.2, "tiempo_servicio": 5, "num_locks": 2},
