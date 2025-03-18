@@ -2,7 +2,7 @@ import simpy
 import random
 import statistics
 
-# Clase que representa la simulación del canal
+# Clase que representa la simulación del canal.
 class CanalSimulation:
     def __init__(self, env, num_locks, tiempo_servicio):
         self.env = env
