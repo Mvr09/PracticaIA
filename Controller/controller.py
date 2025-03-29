@@ -4,6 +4,7 @@ import statistics
 import pandas as pd
 import itertools
 import contextlib
+import os
 
 from Model.boat import Boat
 from Model.cargo import Cargo
@@ -37,10 +38,10 @@ def random_cargo():
 
 # --- Canal Simulation Class ---
 class CanalSimulation:
-    def __init__(self, env, num_locks, tiempo_servicio, base_fee=1000):
+    def __init__(self, env, num_locks, avg_service_time, base_fee=1000):
         self.env = env
         self.lock = simpy.Resource(env, capacity=num_locks)
-        self.tiempo_servicio = tiempo_servicio  # average service time in the canal
+        self.avg_service_time = avg_service_time  # average service time in the canal
         self.base_fee = base_fee  # base fee when no waiting occurs
         self.ship_logs = []  # log for ship events
         self.cargo_logs = []  # log for cargo details (per ship)
@@ -49,7 +50,7 @@ class CanalSimulation:
         self.ship_count = 0
         self.wait_times = []  # for computing average wait time
 
-    def process_ship_with_cargo(self, boat, cargo_options):
+    def process_ship_with_cargo(self, ship, cargo_options):
         """
         Process a ship:
           - The ship arrives.
@@ -60,33 +61,26 @@ class CanalSimulation:
           - All events are logged.
         """
         arrival_time = self.env.now
-        #print(f"{arrival_time:.2f}: {boat.name} arrives at the canal.")
 
         # Suppress optimizer's extra logs using contextlib.redirect_stdout
         with contextlib.redirect_stdout(None):
-            load_optimal_cargo(boat, cargo_options)
+            load_optimal_cargo(ship, cargo_options)
 
         with self.lock.request() as request:
             yield request
             entry_time = self.env.now
             wait_time = entry_time - arrival_time
             self.wait_times.append(wait_time)
-            # Fee calculation: longer wait => lower fee
             fee = self.base_fee / (1 + wait_time)
             self.total_fees_collected += fee
-            #print(f"{entry_time:.2f}: {boat.name} enters the canal after waiting {wait_time:.2f}. Fee: {fee:.2f}")
 
-            # Simulate service time through the canal (exponentially distributed)
-            service_time = random.expovariate(1.0 / self.tiempo_servicio)
+            service_time = random.expovariate(1.0 / self.avg_service_time)
             yield self.env.timeout(service_time)
             exit_time = self.env.now
-            #print(f"{exit_time:.2f}: {boat.name} exits the canal. Service time: {service_time:.2f}")
 
-            # Compute total cargo value for the boat
-            cargo_value = sum(c.value_per_unit * c.weight for c in boat.cargo_list)
-            # Log ship-related information
+            cargo_value = sum(c.value_per_unit * c.weight for c in ship.cargo_list)
             self.ship_logs.append({
-                "Ship": boat.name,
+                "Ship": ship.name,
                 "Arrival": arrival_time,
                 "Entry": entry_time,
                 "Wait Time": wait_time,
@@ -94,15 +88,14 @@ class CanalSimulation:
                 "Exit": exit_time,
                 "Fee": fee,
                 "Cargo Value": cargo_value,
-                "Cargo Weight": boat.current_weight,
-                "Cargo Space": boat.current_space,
-                "Free Weight": boat.max_weight - boat.current_weight,
-                "Free Space": boat.max_space - boat.current_space
+                "Cargo Weight": ship.current_weight,
+                "Cargo Space": ship.current_space,
+                "Free Weight": ship.max_weight - ship.current_weight,
+                "Free Space": ship.max_space - ship.current_space
             })
-            # Log each cargo item loaded onto the ship
-            for cargo in boat.cargo_list:
+            for cargo in ship.cargo_list:
                 self.cargo_logs.append({
-                    "Ship": boat.name,
+                    "Ship": ship.name,
                     "Cargo": cargo.name,
                     "Category": cargo.category,
                     "Weight": cargo.weight,
@@ -111,21 +104,20 @@ class CanalSimulation:
                 })
             self.ship_count += 1
 
-    def run(self, until, tasa_llegada, cargo_options):
+    def run(self, until, arrival_rate, cargo_options):
         """
         Starts the ship arrivals process and runs the simulation until the given time.
         """
 
-        def ship_arrivals(env, tasa_llegada, canal_sim, cargo_options):
+        def ship_arrivals(env, arrival_rate, canal_sim, cargo_options):
             while True:
-                interarrival = random.expovariate(tasa_llegada)
+                interarrival = random.expovariate(arrival_rate)
                 yield env.timeout(interarrival)
-                boat = random_boat()
-                env.process(canal_sim.process_ship_with_cargo(boat, cargo_options))
+                ship = random_boat()
+                env.process(canal_sim.process_ship_with_cargo(ship, cargo_options))
 
-        self.env.process(ship_arrivals(self.env, tasa_llegada, self, cargo_options))
+        self.env.process(ship_arrivals(self.env, arrival_rate, self, cargo_options))
         self.env.run(until=until)
-        # Log overall canal stats at the end of the simulation
         average_wait = statistics.mean(self.wait_times) if self.wait_times else 0
         self.canal_logs.append({
             "Total Ships": self.ship_count,
@@ -136,12 +128,11 @@ class CanalSimulation:
 
 
 # --- Simulation Runner Function ---
-def run_simulation(sim_time, tasa_llegada, tiempo_servicio, num_locks, cargo_options):
+def run_simulation(simulation_time, arrival_rate, avg_service_time, num_locks, cargo_options):
     random.seed(42)  # For reproducibility
     env = simpy.Environment()
-    canal_sim = CanalSimulation(env, num_locks, tiempo_servicio)
-    canal_sim.run(until=sim_time, tasa_llegada=tasa_llegada, cargo_options=cargo_options)
-    # Create DataFrames from logs for later analysis/graphing
+    canal_sim = CanalSimulation(env, num_locks, avg_service_time)
+    canal_sim.run(until=simulation_time, arrival_rate=arrival_rate, cargo_options=cargo_options)
     df_ships = pd.DataFrame(canal_sim.ship_logs)
     df_cargos = pd.DataFrame(canal_sim.cargo_logs)
     df_canal = pd.DataFrame(canal_sim.canal_logs)
@@ -149,37 +140,35 @@ def run_simulation(sim_time, tasa_llegada, tiempo_servicio, num_locks, cargo_opt
 
 
 def run_all_scenarios():
-    sim_time = 1000  # Total simulation time
+    simulation_time = 1000  # Total simulation time
 
     # Define ranges for parameters
-    tasa_llegada_options = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    tiempo_servicio_options = [2.5, 5, 7.5, 10]
+    arrival_rate_options = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    avg_service_time_options = [2.5, 5, 7.5, 10]
     num_locks_options = [1, 2, 3, 4, 5]
 
     # Create a global list of cargo options (10 random cargo types)
     cargo_options = [random_cargo() for _ in range(10)]
 
     # Generate scenario combinations using itertools.product
-    scenarios = list(itertools.product(tasa_llegada_options, tiempo_servicio_options, num_locks_options))
+    scenarios = list(itertools.product(arrival_rate_options, avg_service_time_options, num_locks_options))
 
-    # Prepare master lists to collect logs from all scenarios
     master_ship_logs = []
     master_cargo_logs = []
     master_canal_logs = []
 
-    for idx, (tasa_llegada, tiempo_servicio, num_locks) in enumerate(scenarios, start=1):
-        scenario_name = f"Scenario {idx}/{len(scenarios)}: TL={tasa_llegada}, TS={tiempo_servicio}, Locks={num_locks}"
+    for idx, (arrival_rate, avg_service_time, num_locks) in enumerate(scenarios, start=1):
+        scenario_name = f"Scenario {idx}/{len(scenarios)}: AR={arrival_rate}, ST={avg_service_time}, Locks={num_locks}"
         print("=" * 50)
         print(f"Running {scenario_name}")
         print("=" * 50)
         df_ships, df_cargos, df_canal = run_simulation(
-            sim_time,
-            tasa_llegada,
-            tiempo_servicio,
+            simulation_time,
+            arrival_rate,
+            avg_service_time,
             num_locks,
             cargo_options
         )
-        # Add scenario info to each DataFrame
         df_ships["Scenario"] = scenario_name
         df_cargos["Scenario"] = scenario_name
         df_canal["Scenario"] = scenario_name
@@ -194,7 +183,6 @@ def run_all_scenarios():
     final_cargos_df = pd.concat(master_cargo_logs, ignore_index=True)
     final_canal_df = pd.concat(master_canal_logs, ignore_index=True)
 
-    # Aggregated ship statistics per scenario
     ship_stats = final_ships_df.groupby("Scenario").agg(
         Total_Ships=('Ship', 'count'),
         Min_Wait_Time=('Wait Time', 'min'),
@@ -221,5 +209,16 @@ def run_all_scenarios():
 
 
 if __name__ == "__main__":
-    # Run all scenarios and generate the logs DataFrames
     final_ships_df, final_cargos_df, final_canal_df, ship_stats = run_all_scenarios()
+
+    # --- Export CSV Files to the View Folder ---
+    # Determine output directory relative to this file's location (assuming this file is in Controller and View is at ../View)
+    output_dir = os.path.join(os.path.dirname(__file__), "..", "View")
+    os.makedirs(output_dir, exist_ok=True)
+
+    final_ships_df.to_csv(os.path.join(output_dir, "ship_log.csv"), index=False)
+    final_cargos_df.to_csv(os.path.join(output_dir, "cargo_log.csv"), index=False)
+    final_canal_df.to_csv(os.path.join(output_dir, "canal_log.csv"), index=False)
+    ship_stats.to_csv(os.path.join(output_dir, "ship_stats.csv"), index=False)
+
+    print("CSV files have been generated in the View folder.")
