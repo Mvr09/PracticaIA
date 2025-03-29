@@ -152,9 +152,9 @@ def run_all_scenarios():
     sim_time = 1000  # Total simulation time
 
     # Define ranges for parameters
-    tasa_llegada_options = [0.1, 0.2]
-    tiempo_servicio_options = [2.5, 5]
-    num_locks_options = [1, 2, 3, 4]
+    tasa_llegada_options = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    tiempo_servicio_options = [2.5, 5, 7.5, 10]
+    num_locks_options = [1, 2, 3, 4, 5]
 
     # Create a global list of cargo options (10 random cargo types)
     cargo_options = [random_cargo() for _ in range(10)]
