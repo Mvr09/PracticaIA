@@ -100,20 +100,20 @@ def load_optimal_cargo(boat, cargo_options):
     return boat
 
 
-if __name__ == "__main__":
-    # Example usage:
-    boat = Boat("Panama Express", max_weight=10000, max_space=500)
-
-    # Define available cargo options.
-    cargo_options = [
-        Cargo("Container A", value_per_unit=100, weight=2000, space_required=150, category="Container"),
-        Cargo("Container B", value_per_unit=150, weight=3000, space_required=200, category="Container"),
-        Cargo("Bulk Cargo", value_per_unit=50, weight=6000, space_required=250, category="Bulk"),
-    ]
-
-    # Optimize cargo loading and apply the result to the boat.
-    optimized_boat = load_optimal_cargo(boat, cargo_options)
-
-    print("\nFinal cargo loaded on the boat:")
-    for cargo in optimized_boat.cargo_list:
-        print(cargo)
+# if __name__ == "__main__":
+#     # Example usage:
+#     boat = Boat("Panama Express", max_weight=10000, max_space=500)
+#
+#     # Define available cargo options.
+#     cargo_options = [
+#         Cargo("Container A", value_per_unit=100, weight=2000, space_required=150, category="Container"),
+#         Cargo("Container B", value_per_unit=150, weight=3000, space_required=200, category="Container"),
+#         Cargo("Bulk Cargo", value_per_unit=50, weight=6000, space_required=250, category="Bulk"),
+#     ]
+#
+#     # Optimize cargo loading and apply the result to the boat.
+#     optimized_boat = load_optimal_cargo(boat, cargo_options)
+#
+#     print("\nFinal cargo loaded on the boat:")
+#     for cargo in optimized_boat.cargo_list:
+#         print(cargo)
