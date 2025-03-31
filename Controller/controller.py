@@ -223,7 +223,9 @@ if __name__ == "__main__":
 
     print("CSV files have been generated in the View folder.")
 
-
+"""
+Funcion para llamarla desde main.py y tener el mismo resutado que si este es el que se ejecuta
+"""
 def mainCall():
     final_ships_df, final_cargos_df, final_canal_df, ship_stats = run_all_scenarios()
 
