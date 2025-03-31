@@ -222,3 +222,19 @@ if __name__ == "__main__":
     ship_stats.to_csv(os.path.join(output_dir, "ship_stats.csv"), index=False)
 
     print("CSV files have been generated in the View folder.")
+
+
+def mainCall():
+    final_ships_df, final_cargos_df, final_canal_df, ship_stats = run_all_scenarios()
+
+    # --- Export CSV Files to the View Folder ---
+    # Determine output directory relative to this file's location (assuming this file is in Controller and View is at ../View)
+    output_dir = os.path.join(os.path.dirname(__file__), "..", "View")
+    os.makedirs(output_dir, exist_ok=True)
+
+    final_ships_df.to_csv(os.path.join(output_dir, "ship_log.csv"), index=False)
+    final_cargos_df.to_csv(os.path.join(output_dir, "cargo_log.csv"), index=False)
+    final_canal_df.to_csv(os.path.join(output_dir, "canal_log.csv"), index=False)
+    ship_stats.to_csv(os.path.join(output_dir, "ship_stats.csv"), index=False)
+
+    print("CSV files have been generated in the View folder.")
