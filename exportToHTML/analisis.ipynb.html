@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>analisis.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #7a7e85;}
+.s1 { color: #bcbec4;}
+.s2 { color: #cf8e6d;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+.ls0 { height: 1px; border-width: 0; color: #43454a; background-color:#43454a}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+analisis.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% 
+# Canal Simulation Analysis Notebook</span>
+<span class="s2">import </span><span class="s1">pandas </span><span class="s2">as </span><span class="s1">pd</span>
+<span class="s2">import </span><span class="s1">matplotlib</span><span class="s3">.</span><span class="s1">pyplot </span><span class="s2">as </span><span class="s1">plt</span>
+<span class="s2">import </span><span class="s1">numpy </span><span class="s2">as </span><span class="s1">np</span>
+<span class="s2">import </span><span class="s1">seaborn </span><span class="s2">as </span><span class="s1">sns</span><hr class="ls0"><span class="s0">#%% 
+# Configuración inicial</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">style</span><span class="s3">.</span><span class="s1">use</span><span class="s3">(</span><span class="s4">'seaborn'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">rcParams</span><span class="s3">[</span><span class="s4">'figure.figsize'</span><span class="s3">] = (</span><span class="s5">12</span><span class="s3">, </span><span class="s5">6</span><span class="s3">)</span>
+<span class="s1">pd</span><span class="s3">.</span><span class="s1">set_option</span><span class="s3">(</span><span class="s4">'display.max_columns'</span><span class="s3">, </span><span class="s2">None</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+# 1. Cargar los datos</span>
+<span class="s1">ship_log </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s4">&quot;ship_log.csv&quot;</span><span class="s3">)</span>
+<span class="s1">cargo_log </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s4">&quot;cargo_log.csv&quot;</span><span class="s3">)</span>
+<span class="s1">canal_log </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s4">&quot;canal_log.csv&quot;</span><span class="s3">)</span>
+<span class="s1">ship_stats </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s4">&quot;ship_stats.csv&quot;</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+# Mostrar las primeras filas de cada dataframe</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Ship Log:&quot;</span><span class="s3">)</span>
+<span class="s1">display</span><span class="s3">(</span><span class="s1">ship_log</span><span class="s3">.</span><span class="s1">head</span><span class="s3">())</span>
+
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;</span><span class="s2">\n</span><span class="s4">Cargo Log:&quot;</span><span class="s3">)</span>
+<span class="s1">display</span><span class="s3">(</span><span class="s1">cargo_log</span><span class="s3">.</span><span class="s1">head</span><span class="s3">())</span>
+
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;</span><span class="s2">\n</span><span class="s4">Canal Log:&quot;</span><span class="s3">)</span>
+<span class="s1">display</span><span class="s3">(</span><span class="s1">canal_log</span><span class="s3">.</span><span class="s1">head</span><span class="s3">())</span>
+
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;</span><span class="s2">\n</span><span class="s4">Ship Stats:&quot;</span><span class="s3">)</span>
+<span class="s1">display</span><span class="s3">(</span><span class="s1">ship_stats</span><span class="s3">.</span><span class="s1">head</span><span class="s3">())</span>
+<hr class="ls0"><span class="s0">#%% 
+# 2. Análisis básico</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;Número total de barcos simulados: </span><span class="s2">{</span><span class="s1">len</span><span class="s3">(</span><span class="s1">ship_log</span><span class="s3">)</span><span class="s2">}</span><span class="s4">&quot;</span><span class="s3">)</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;Número total de cargamentos registrados: </span><span class="s2">{</span><span class="s1">len</span><span class="s3">(</span><span class="s1">cargo_log</span><span class="s3">)</span><span class="s2">}</span><span class="s4">&quot;</span><span class="s3">)</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;Número de escenarios simulados: </span><span class="s2">{</span><span class="s1">len</span><span class="s3">(</span><span class="s1">canal_log</span><span class="s3">)</span><span class="s2">}</span><span class="s4">&quot;</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+# Tiempo de espera por escenario</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">figure</span><span class="s3">(</span><span class="s1">figsize</span><span class="s3">=(</span><span class="s5">14</span><span class="s3">, </span><span class="s5">6</span><span class="s3">))</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">boxplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">ship_log</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'Scenario'</span><span class="s3">, </span><span class="s1">y</span><span class="s3">=</span><span class="s4">'Wait Time'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">xticks</span><span class="s3">(</span><span class="s1">rotation</span><span class="s3">=</span><span class="s5">45</span><span class="s3">, </span><span class="s1">ha</span><span class="s3">=</span><span class="s4">'right'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Distribución del tiempo de espera por escenario'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">tight_layout</span><span class="s3">()</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# Tarifas por escenario</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">figure</span><span class="s3">(</span><span class="s1">figsize</span><span class="s3">=(</span><span class="s5">14</span><span class="s3">, </span><span class="s5">6</span><span class="s3">))</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">boxplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">ship_log</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'Scenario'</span><span class="s3">, </span><span class="s1">y</span><span class="s3">=</span><span class="s4">'Fee'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">xticks</span><span class="s3">(</span><span class="s1">rotation</span><span class="s3">=</span><span class="s5">45</span><span class="s3">, </span><span class="s1">ha</span><span class="s3">=</span><span class="s4">'right'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Distribución de tarifas por escenario'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">tight_layout</span><span class="s3">()</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# Valor del cargamento vs tiempo de espera</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">figure</span><span class="s3">(</span><span class="s1">figsize</span><span class="s3">=(</span><span class="s5">10</span><span class="s3">, </span><span class="s5">6</span><span class="s3">))</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">scatterplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">ship_log</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'Wait Time'</span><span class="s3">, </span><span class="s1">y</span><span class="s3">=</span><span class="s4">'Cargo Value'</span><span class="s3">, </span><span class="s1">hue</span><span class="s3">=</span><span class="s4">'Scenario'</span><span class="s3">, </span><span class="s1">alpha</span><span class="s3">=</span><span class="s5">0.6</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Valor del cargamento vs Tiempo de espera'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# 4. Análisis por categoría de cargamento</span>
+<span class="s2">if </span><span class="s4">'Category' </span><span class="s2">in </span><span class="s1">cargo_log</span><span class="s3">.</span><span class="s1">columns</span><span class="s3">:</span>
+    <span class="s1">plt</span><span class="s3">.</span><span class="s1">figure</span><span class="s3">(</span><span class="s1">figsize</span><span class="s3">=(</span><span class="s5">10</span><span class="s3">, </span><span class="s5">6</span><span class="s3">))</span>
+    <span class="s1">cargo_log</span><span class="s3">.</span><span class="s1">groupby</span><span class="s3">(</span><span class="s4">'Category'</span><span class="s3">)[</span><span class="s4">'Value'</span><span class="s3">].</span><span class="s1">sum</span><span class="s3">().</span><span class="s1">sort_values</span><span class="s3">().</span><span class="s1">plot</span><span class="s3">(</span><span class="s1">kind</span><span class="s3">=</span><span class="s4">'bar'</span><span class="s3">)</span>
+    <span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Valor total por categoría de cargamento'</span><span class="s3">)</span>
+    <span class="s1">plt</span><span class="s3">.</span><span class="s1">ylabel</span><span class="s3">(</span><span class="s4">'Valor total'</span><span class="s3">)</span>
+    <span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# 5. Estadísticas agregadas</span>
+<span class="s1">display</span><span class="s3">(</span><span class="s1">ship_stats</span><span class="s3">.</span><span class="s1">describe</span><span class="s3">())</span>
+<hr class="ls0"><span class="s0">#%% 
+# 6. Correlaciones</span>
+<span class="s1">numeric_cols </span><span class="s3">= </span><span class="s1">ship_log</span><span class="s3">.</span><span class="s1">select_dtypes</span><span class="s3">(</span><span class="s1">include</span><span class="s3">=[</span><span class="s1">np</span><span class="s3">.</span><span class="s1">number</span><span class="s3">]).</span><span class="s1">columns</span>
+<span class="s1">corr_matrix </span><span class="s3">= </span><span class="s1">ship_log</span><span class="s3">[</span><span class="s1">numeric_cols</span><span class="s3">].</span><span class="s1">corr</span><span class="s3">()</span>
+
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">figure</span><span class="s3">(</span><span class="s1">figsize</span><span class="s3">=(</span><span class="s5">10</span><span class="s3">, </span><span class="s5">8</span><span class="s3">))</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">heatmap</span><span class="s3">(</span><span class="s1">corr_matrix</span><span class="s3">, </span><span class="s1">annot</span><span class="s3">=</span><span class="s2">True</span><span class="s3">, </span><span class="s1">cmap</span><span class="s3">=</span><span class="s4">'coolwarm'</span><span class="s3">, </span><span class="s1">center</span><span class="s3">=</span><span class="s5">0</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Matriz de correlación'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% 
+</span></pre>
+</body>
+</html>
