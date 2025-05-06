@@ -1,10 +1,11 @@
 class Boat:
-    def __init__(self, name, max_weight, max_space):
+    def __init__(self, name, max_weight, max_space, total_value):
         self.name = name
         self.max_weight = max_weight
         self.max_space = max_space
         self.current_weight = 0
         self.current_space = 0
+        self.total_value = 0
         self.cargo_list = []
 
     def can_load(self, cargo):
@@ -14,6 +15,7 @@ class Boat:
         if self.current_space + cargo.space_required > self.max_space:
             print(f"Cannot load {cargo.name}: space limit exceeded.")
             return False
+        self.cargo =+ cargo.value_per_unit
         return True
 
     def load_cargo(self, cargo):

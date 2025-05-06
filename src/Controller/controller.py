@@ -1,3 +1,43 @@
+
+"""
+ _____                   _       _       ______
+/  __ \                 | |     | |      | ___ \
+| /  \/ __ _ _ __   __ _| |   __| | ___  | |_/ /_ _ _ __   __ _ _ __ ___   __ _
+| |    / _` | '_ \ / _` | |  / _` |/ _ \ |  __/ _` | '_ \ / _` | '_ ` _ \ / _` |
+| \__/\ (_| | | | | (_| | | | (_| |  __/ | | | (_| | | | | (_| | | | | | | (_| |
+ \____/\__,_|_| |_|\__,_|_|  \__,_|\___| \_|  \__,_|_| |_|\__,_|_| |_| |_|\__,_|
+                          ░
+                       ░  ▓
+                    ▒█░  ░▓
+                  ▓██  █ █▒
+                ████  █▒ █▒
+              ▒████░ ██ ██▒
+            ░█████▓ ███ ██▒
+           ███████ ░██▓ ██▒
+          ███████▓ ▓██▓░██▓
+        ▓████████  ███░░███
+       ██████████ ▒███▒▒███
+      ██████████▓ ▒███░▓███▓
+     ███████████  ████ ▓████
+    ████████████  ████ ▓█████
+   █████████████  ▓███ ▓██████
+  ▒█████████████  ▒███ ███████▓
+  ██████████████▓  ███ █████████
+ ▓███████████████  ▓██ ██████████▓
+ ████████████████▒  ██ ████████████░
+▒█████████████████   █ █      ▒██████▓
+     ░▓████████████    ▓               ▒█
+                   ░░  ▒         ░
+  ▒██▓▒░             ░▒██▓▓▓▓█▒▒▓▒▓▓▒░░░
+   ████████████████████████████████████████████░
+     ▓██████████████████████████████████████▒
+        ▓███████████████████████████████▒
+      ▒█████████████████████████████████
+            ░▒▓▓▓█████████████▓▓▒▒
+"""
+
+
+
 import simpy
 import random
 import statistics
@@ -8,6 +48,8 @@ import os
 import time
 from concurrent.futures import ProcessPoolExecutor
 
+
+
 from src.Model.boat import Boat
 from src.Model.cargo import Cargo
 from src.Model.cargo_optimizer import load_optimal_cargo
@@ -17,10 +59,12 @@ from src.Model.cargo_optimizer import load_optimal_cargo
 USE_OPTIMIZATION = False
 
 # --- Utility Functions for Random Generation ---
+
 def random_boat():
     """
     Create a Boat with randomized max_weight and max_space using an exponential distribution.
     Mean weight capacity is ~10000 units and mean space capacity is ~500 units.
+    @author: nombre
     """
     max_weight = max(1000, int(random.expovariate(1 / 10000)))  # ensuring a minimum capacity
     max_space = max(100, int(random.expovariate(1 / 500)))       # ensuring a minimum capacity
