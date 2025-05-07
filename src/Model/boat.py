@@ -1,5 +1,5 @@
 class Boat:
-    def __init__(self, name, max_weight, max_space, total_value):
+    def __init__(self, name, max_weight, max_space, total_value=0):
         self.name = name
         self.max_weight = max_weight
         self.max_space = max_space
@@ -23,6 +23,7 @@ class Boat:
             self.cargo_list.append(cargo)
             self.current_weight += cargo.weight
             self.current_space += cargo.space_required
+            self.total_value += cargo.value_per_unit
             print(f"Cargo '{cargo.name}' loaded successfully.")
         else:
             print(f"Failed to load cargo '{cargo.name}'.")
